@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>阅知 · 文献笔记</title>
+<style>
+:root{
+  --green:#315e50;--muted:#8a938e;--line:#e6e9e3;--ink:#263b35;
+  --sans:"Noto Sans SC",-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);background:#fafbf8;font-family:var(--sans);font-size:13px}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;color:inherit;border:0;background:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+button:disabled{opacity:.4;cursor:default}
+input,textarea,select{outline:none;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #87aa98;outline-offset:3px}
+input,textarea{min-width:0}
+svg{flex-shrink:0}
+.app{display:flex;height:100dvh;overflow:hidden}
+.sidebar{width:236px;background:#f2f4ee;border-right:1px solid var(--line);padding:31px 20px 18px;display:flex;flex-direction:column;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:34px}
+.brand-icon{width:39px;height:42px;color:var(--green);border:1px solid #c3cec1;border-radius:10px;display:grid;place-items:center;background:#e6ecdf}
+.brand b{font-size:24px;font-family:var(--serif);white-space:nowrap}
+.brand b span{display:block;font-size:8px;letter-spacing:2px;font-family:sans-serif;color:#6d7f72;margin-top:3px}
+.workspace{display:flex;gap:10px;padding:14px 0 24px;border-bottom:1px solid #dfe5da}
+.avatar{background:#e0e8d8;border-radius:50%;width:34px;height:34px;display:grid;place-items:center;font-family:serif}
+.workspace b{font-size:12px;font-weight:500}
+.workspace small{display:flex;gap:4px;align-items:center;color:#899385;font-size:9px;margin-top:5px}
+.nav-label{font-size:10px;color:#8f998c;letter-spacing:1.5px;margin:27px 9px 12px}
+.nav-item{height:42px;padding:0 11px;width:100%;justify-content:flex-start;text-align:left;border-radius:6px;color:#60705f;font-size:12px}
+.nav-item span{margin-left:auto;font-size:10px;color:#8a9587}
+.nav-item.active{background:#e2e9dc;color:#325b46;font-weight:600}
+.topics-label{display:flex;justify-content:space-between;align-items:center;margin-top:29px}
+.topics-label button{padding:0}
+.nav-item i{width:7px;height:7px;border-radius:50%;margin-right:4px}
+.topic-row{position:relative}
+.topic-row .nav-item{padding-right:29px}
+.rename{position:absolute;right:4px;top:10px;opacity:0}
+.topic-row:hover .rename{opacity:1}
+.add-topic{font-size:11px;justify-content:flex-start;padding:14px 10px;color:#929c8d}
+.sidebar-bottom{margin-top:auto}
+.tip{border:1px solid #dfe5d9;border-radius:8px;padding:15px 12px;margin:30px 0 17px}
+.tip span{font-family:var(--serif);font-size:12px}
+.tip p{font-size:10px;color:#919b8d;line-height:1.9;margin:9px 0 0}
+.sidebar-bottom>button{display:flex;justify-content:flex-start;width:100%;font-size:11px;padding:10px;color:#74816f}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+header{height:65px;background:#fff;border-bottom:1px solid var(--line);padding:0 29px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.breadcrumb{display:flex;align-items:center;gap:13px;font-size:11px;color:#929b94}
+.breadcrumb b{font-weight:500;color:#536457}
+.cloud{display:flex;gap:7px;align-items:center;color:#8a958b;font-size:10px}
+.cloud button{font-size:10px;padding:3px}
+.dot{width:5px;height:5px;border-radius:50%;background:#7e9c72}
+.dot.red{background:#b76654}
+.dot.amber{background:#c69d65}
+.private{display:flex;gap:5px;align-items:center;background:#f3f6ef;border:1px solid #e6ebdf;border-radius:5px;padding:4px 7px;margin-left:15px}
+.workspace-body{display:flex;min-height:0;flex:1}
+.library{width:305px;border-right:1px solid var(--line);background:#fbfcf8;display:flex;flex-direction:column;padding:30px 22px 0;flex-shrink:0}
+.library-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:21px}
+.library-heading small{font-size:9px;letter-spacing:2px;color:#9ba48f}
+.library-heading h1{font-size:21px;font-weight:500;letter-spacing:1px;margin:7px 0 0;font-family:var(--serif)}
+.library-heading>span{font-size:10px;color:#939e8c;background:#edf1e7;border-radius:20px;padding:4px 8px}
+.primary{background:var(--green);color:#fff;border-radius:6px;padding:11px 18px;font-size:12px;box-shadow:0 3px 7px #315e5012}
+.primary:hover{background:#274f42}
+.new-note{width:100%;margin-bottom:19px}
+.search{display:flex;align-items:center;gap:9px;border:1px solid #e1e6dc;background:#fff;padding:10px;border-radius:6px;color:#9ba592}
+.search input{width:100%;border:0;background:none;font-size:11px}
+.search input::placeholder{color:#a0a89a}
+.list-label{font-size:10px;color:#98a18e;display:flex;justify-content:space-between;padding:25px 2px 12px}
+.note-list{overflow:auto;flex:1}
+.note-card{display:block;text-align:left;width:100%;padding:17px 14px;margin-bottom:11px;border:1px solid #e5e9df;border-radius:7px;background:#fff}
+.note-card.selected{border-color:#94ad91;background:#f1f5eb;box-shadow:inset 3px 0 #51764b}
+.card-top,.card-bottom{display:flex;justify-content:space-between;align-items:center;gap:5px}
+.tag{display:inline-block;color:#6e886a;font-size:9px;padding:4px 7px;background:#edf2e6;border-radius:4px}
+.year{font-size:9px;color:#9ca591}
+.note-card h3{font-family:var(--serif);font-weight:600;font-size:14px;line-height:1.8;margin:12px 0 7px;overflow-wrap:anywhere}
+.note-card p{font-size:10px;color:#8c9786;margin:0 0 18px}
+.card-bottom{font-size:9px;color:#a0a892}
+.reading{color:#b89d66}
+.reading.done{color:#739369}
+.library-footer{height:49px;display:flex;align-items:center;justify-content:center;gap:6px;color:#a0a995;font-size:9px}
+.empty-list{text-align:center;margin:65px 0;color:#a9b29e}
+.empty-list svg{stroke-width:1.1}
+.empty-list p{font-size:12px;margin:13px 0 9px}
+.empty-list small{font-size:10px}
+.editor-pane{overflow:auto;background:#fff;flex:1;min-width:0;position:relative}
+.welcome{max-width:630px;margin:12vh auto;text-align:center;padding:20px}
+.welcome-icon{width:84px;height:84px;margin:auto auto 29px;background:#f0f4e9;border:1px solid #e5ebde;border-radius:25px;display:grid;place-items:center;color:#6d8b64;transform:rotate(-5deg)}
+.eyebrow{font-size:9px;letter-spacing:3px;color:#9da88e}
+.welcome h2{font-family:var(--serif);font-size:35px;line-height:1.7;font-weight:500;letter-spacing:2px;margin:20px 0 15px}
+.welcome p{font-size:12px;color:#9ba391;line-height:2.2;margin-bottom:28px}
+.welcome-features{display:flex;justify-content:center;gap:27px;margin-top:43px;font-size:10px;color:#96a08b}
+.welcome-features span{display:flex;gap:7px;align-items:center}
+.document-top{display:flex;justify-content:space-between;align-items:center;padding:24px 43px 0}
+.document-top>div{display:flex;gap:16px;align-items:center}
+.document-top select{border:1px solid #e3e8df;background:#fafcf6;border-radius:5px;padding:5px 8px;font-size:10px}
+.document-top button{color:#9ba491}
+.document{padding:0 43px;max-width:1000px;margin:auto}
+.doc-title{font-family:var(--serif);resize:vertical;font-size:26px;line-height:1.65;font-weight:600;width:100%;border:0;margin:23px 0 14px;background:none;min-height:90px}
+.metadata{display:grid;grid-template-columns:1.5fr 1.5fr .7fr;gap:13px 22px;padding-bottom:25px}
+.metadata label{display:flex;align-items:center;gap:9px;min-width:0}
+.metadata label:nth-child(4){grid-column:span 2}
+.metadata span{color:#9ba493;font-size:10px;white-space:nowrap}
+.metadata input,.metadata select{width:100%;border:0;border-bottom:1px solid #edf0e9;padding:5px 0;font-size:11px;background:#fff}
+.metadata input::placeholder{color:#bbc2b5}
+.toolbar{position:sticky;top:0;z-index:5;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#fcfdf9f5;backdrop-filter:blur(6px);display:flex;align-items:center;gap:7px;padding:10px 35px;min-height:50px}
+.toolbar button{padding:6px;border-radius:4px}
+.toolbar button:hover{background:#eaf0e3}
+.toolbar select{background:#fff;border:1px solid #e5e9de;border-radius:4px;padding:4px;font-size:10px}
+.divider{width:1px;height:18px;background:#e0e5d9;margin:0 5px}
+.color{position:relative;display:flex;flex-direction:column;font-family:serif;font-size:16px;padding:0 7px}
+.color input{height:5px;width:18px;border:0;padding:0;cursor:pointer}
+.image-button{font-size:11px}
+.toolbar-tip{margin-left:auto;font-size:9px;color:#a4ad9a;white-space:nowrap}
+.sections{padding-top:12px}
+.note-section{padding:27px 0 22px;border-bottom:1px solid #eef0e9}
+.section-heading{display:flex;align-items:center;gap:12px;margin-bottom:17px}
+.section-number{font-family:serif;font-size:12px;color:#a8b39c;background:#f3f5ee;padding:5px 6px;border-radius:4px}
+.section-heading>input{flex:1;background:none;border:0;font-size:15px;font-family:var(--serif);font-weight:600;width:100%}
+.section-actions{display:flex;gap:2px;opacity:0}
+.note-section:hover .section-actions,.section-actions:focus-within{opacity:1}
+.section-actions button{padding:5px;color:#99a38d}
+.editable{min-height:58px;font-size:16px;line-height:1.9;outline:none;overflow-wrap:anywhere;color:#455446;padding-left:38px}
+.editable:empty:before{content:attr(data-placeholder);color:#bac1b2;font-size:12px;pointer-events:none}
+.editable img{max-width:100%;height:auto;border-radius:5px;margin:12px 0}
+.editable p{margin:8px 0}
+.add-section{border:1px dashed #cdd7c2;background:#fafcf6;color:#809571;padding:12px;width:100%;border-radius:5px;margin:25px 0 8px;font-size:11px}
+.document-footer{text-align:center;color:#b0b8a6;font-size:9px;margin:24px 0 40px}
+.error{background:#fff0e5;color:#9c5332;padding:12px 22px;font-size:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.error[hidden]{display:none}
+.error button{text-decoration:underline}
+.modal-backdrop{position:fixed;inset:0;background:#22382966;backdrop-filter:blur(5px);display:grid;place-items:center;z-index:30;padding:20px}
+.modal-backdrop[hidden]{display:none}
+.modal{background:#fffffb;border-radius:14px;max-width:540px;padding:35px 40px;box-shadow:0 25px 80px #1b2c2820;max-height:90vh;overflow:auto}
+.modal h2{font-family:var(--serif);font-weight:500}
+.modal ol{padding-left:20px;line-height:2;font-size:12px;color:#798670}
+.modal li{margin-bottom:12px}
+.mobile-menu{display:none}
+@media (min-width:1500px){
+  .sidebar{width:255px;padding-left:25px;padding-right:25px}
+  .library{width:330px}
+  .document{padding-left:65px;padding-right:65px}
+}
+@media (max-width:1100px){
+  .sidebar{width:195px;padding:25px 12px}
+  .library{width:250px;padding:25px 15px 0}
+  .document{padding:0 25px}
+  .document-top{padding:22px 25px 0}
+  .toolbar{padding:10px 20px}
+  .toolbar-tip{display:none}
+  .doc-title{font-size:22px}
+  .metadata{grid-template-columns:1fr 1fr}
+  .metadata label:nth-child(4){grid-column:auto}
+  .welcome h2{font-size:29px}
+}
+@media (max-width:800px){
+  .sidebar{display:none}
+  .sidebar.open{display:flex;position:fixed;inset:65px auto 0 0;z-index:20;width:230px;box-shadow:15px 0 50px #0002}
+  .mobile-menu{display:flex}
+  .library{width:215px}
+  .cloud .private{display:none}
+  header{padding:0 15px}
+  .breadcrumb{gap:6px}
+  .cloud{font-size:9px}
+  .document{padding:0 18px}
+  .document-top{padding:18px}
+  .metadata{display:block}
+  .metadata label{margin-bottom:8px}
+  .toolbar{gap:2px;padding:8px}
+  .editable{padding-left:0}
+  .section-actions{opacity:1}
+  .welcome-features{gap:12px}
+  .welcome{margin-top:7vh;padding:15px}
+  .welcome h2{font-size:24px}
+  .doc-title{font-size:20px}
+}
+@media (max-width:580px){
+  .workspace-body{flex-direction:column}
+  .library{width:100%;height:205px;padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;border-right:0;border-bottom:1px solid var(--line);flex-shrink:0}
+  .library-heading{margin:0}
+  .library-heading small{display:none}
+  .library-heading h1{font-size:17px;margin:0}
+  .new-note{margin:0;font-size:11px;padding:8px}
+  .search{padding:8px}
+  .list-label,.library-footer{display:none}
+  .note-list{grid-column:1/-1;display:flex;gap:8px;min-height:75px}
+  .note-card{flex-shrink:0;width:200px;margin:0;padding:8px 10px}
+  .note-card h3{font-size:11px;margin:5px 0;line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .note-card p,.card-bottom,.card-top .year{display:none}
+  .empty-list{margin:0;grid-column:1/-1;display:flex;align-items:center;gap:10px}
+  .empty-list p{margin:0}
+  .empty-list small{display:none}
+  .welcome{margin:15px auto}
+  .welcome-icon{width:55px;height:55px;margin-bottom:15px}
+  .welcome h2{font-size:24px;line-height:1.5;margin:12px 0}
+  .welcome p{margin-bottom:15px}
+  .welcome-features{margin-top:20px}
+  .breadcrumb{font-size:10px}
+  .cloud{max-width:120px}
+  .section-heading{gap:8px}
+  .section-heading>input{font-size:14px}
+  .toolbar{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<input type="file" id="importFile" accept=".json,application/json" hidden />
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------- 图标 ---------------- */
+  var PATHS = {
+    bookOpen: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+    plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    folderOpen: '<path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    chevronRight: '<path d="m9 18 6-6-6-6"/>',
+    imagePlus: '<path d="M16 5h6"/><path d="M19 2v6"/><path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/><circle cx="9" cy="9" r="2"/>',
+    bold: '<path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"/>',
+    italic: '<line x1="19" x2="10" y1="4" y2="4"/><line x1="14" x2="5" y1="20" y2="20"/><line x1="15" x2="9" y1="4" y2="20"/>',
+    list: '<line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/>',
+    download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
+    upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>',
+    trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+    arrowUp: '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+    arrowDown: '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    fileText: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    panelLeft: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>',
+    help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>'
+  };
+  function ic(name, size) {
+    size = size || 16;
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (PATHS[name] || "") + '</svg>';
+  }
+
+  /* ---------------- 工具 ---------------- */
+  var STORAGE_KEY = "lisha-notebook-v1";
+  var MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
+  var DEFAULT_TOPICS = ["胰腺NET", "胃肠NET", "AI病理", "统计方法"];
+  var DEFAULT_SECTIONS = ["研究目的", "研究设计与方法", "主要结果", "关键图片与说明", "局限性", "对自己研究的启发"];
+  var TOPIC_COLORS = ["#4d8577", "#c69d65", "#8190b5", "#b38b9a"];
+
+  function uid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "id-" + Date.now().toString(36) + "-" + Math.random().toString(16).slice(2);
+  }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function nowISO() { return new Date().toISOString(); }
+  function readAsDataURL(file) {
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(r.result); };
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+
+  /* 清理富文本：移除危险标签/属性，只允许内嵌 base64 图片 */
+  function clean(html) {
+    var doc = new DOMParser().parseFromString(html || "", "text/html");
+    doc.querySelectorAll("script,iframe,object,embed,svg,math,style,link,meta,form,input,button").forEach(function (el) { el.remove(); });
+    doc.body.querySelectorAll("*").forEach(function (el) {
+      Array.prototype.slice.call(el.attributes).forEach(function (attr) {
+        var allowed = ["style", "src", "alt", "width", "height", "color", "size", "face"];
+        if (attr.name.indexOf("on") === 0 || allowed.indexOf(attr.name) === -1) {
+          el.removeAttribute(attr.name);
+        }
+        if (attr.name === "src" && !/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(attr.value)) {
+          el.removeAttribute("src");
+        }
+      });
+      var style = el.getAttribute("style");
+      if (style && /url\s*\(|expression|position\s*:/i.test(style)) el.removeAttribute("style");
+    });
+    return doc.body.innerHTML;
+  }
+
+  /* ---------------- 状态 ---------------- */
+  var state = loadData();
+  var selectedId = state.notes[0] ? state.notes[0].id : "";
+  var topic = "全部文献";
+  var query = "";
+  var menuOpen = false;
+  var saveState = "saved"; // saved | dirty | error
+  var saveTimer = null;
+
+  var activeEl = null;       // 当前聚焦的分节 contentEditable
+  var activeSectionId = "";  // 当前分节 id
+  var savedRange = null;     // 工具栏操作前保存的选区
+
+  function defaultData() {
+    return { topics: DEFAULT_TOPICS.slice(), notes: [] };
+  }
+  function loadData() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return defaultData();
+      var d = JSON.parse(raw);
+      if (!d || !Array.isArray(d.topics) || !Array.isArray(d.notes)) return defaultData();
+      return d;
+    } catch (e) { return defaultData(); }
+  }
+  function findNote(id) {
+    for (var i = 0; i < state.notes.length; i++) if (state.notes[i].id === id) return state.notes[i];
+    return null;
+  }
+
+  /* ---------------- 保存 ---------------- */
+  function setStatus(s) {
+    saveState = s;
+    renderStatus();
+  }
+  function scheduleSave() {
+    setStatus("dirty");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flushSave, 500);
+  }
+  function flushSave() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      setStatus("saved");
+      hideError();
+    } catch (e) {
+      setStatus("error");
+      showError("本机存储空间不足，无法保存。请点击侧栏「导出完整备份」，然后删除部分图片或文献后再试。");
+    }
+  }
+
+  /* ---------------- 错误提示 ---------------- */
+  var errorTimer = null;
+  function showError(msg) {
+    var bar = document.getElementById("errorBar");
+    if (!bar) return;
+    bar.hidden = false;
+    bar.innerHTML = '<span>' + esc(msg) + '</span><button type="button" data-action="dismiss-error">关闭</button>';
+    clearTimeout(errorTimer);
+    errorTimer = setTimeout(hideError, 8000);
+  }
+  function hideError() {
+    var bar = document.getElementById("errorBar");
+    if (bar) { bar.hidden = true; bar.innerHTML = ""; }
+  }
+
+  /* ---------------- 骨架 ---------------- */
+  document.getElementById("app").innerHTML =
+    '<div class="app">' +
+      '<aside class="sidebar" id="sidebar"></aside>' +
+      '<div class="main">' +
+        '<header>' +
+          '<div class="breadcrumb">' +
+            '<button class="mobile-menu" type="button" data-action="toggle-menu" aria-label="菜单">' + ic("panelLeft", 18) + '</button>' +
+            '本地研究空间' + ic("chevronRight", 14) +
+            '<b id="crumbTopic">全部文献</b>' +
+          '</div>' +
+          '<div class="cloud">' +
+            '<span class="dot" id="statusDot"></span>' +
+            '<button type="button" id="statusText" data-action="flush-save">已保存到本机</button>' +
+            '<span class="private">' + ic("users", 12) + '仅本浏览器</span>' +
+          '</div>' +
+        '</header>' +
+        '<div id="errorBar" class="error" hidden></div>' +
+        '<div class="workspace-body">' +
+          '<aside class="library" id="library">' +
+            '<div class="library-heading"><div><small>YOUR LIBRARY</small><h1 id="libraryTitle">全部文献</h1></div><span id="libraryCount">0 篇</span></div>' +
+            '<button class="primary new-note" type="button" data-action="new-note">' + ic("plus", 17) + '新建文献笔记</button>' +
+            '<label class="search">' + ic("search", 16) + '<input id="searchInput" placeholder="搜索文献与笔记…" autocomplete="off" /></label>' +
+            '<div class="list-label">最近更新<span>↓</span></div>' +
+            '<div class="note-list" id="noteList"></div>' +
+            '<div class="library-footer">' + ic("users", 12) + '本地资料库 · 修改自动保存</div>' +
+          '</aside>' +
+          '<main class="editor-pane" id="editorPane"></main>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="modal-backdrop" id="guideModal" hidden>' +
+      '<div class="modal" role="dialog" aria-modal="true">' +
+        '<span class="eyebrow">GETTING STARTED</span>' +
+        '<h2>开始你的第一篇笔记</h2>' +
+        '<ol>' +
+          '<li>所有内容只保存在<strong>当前浏览器</strong>，不会上传到任何服务器，换设备或清理浏览器数据会丢失。</li>' +
+          '<li>在左侧选择研究主题，或点击「添加研究主题」。</li>' +
+          '<li>点击「新建文献笔记」，填写题目、期刊等信息。</li>' +
+          '<li>点击分节正文输入文字。选中文字后可加粗、斜体、调字号和颜色。</li>' +
+          '<li>复制图片或截图后，在正文按 ⌘V（Mac）/ Ctrl+V（Windows）即可插入，也可用「插入图片」。单张不超过 1.5MB。</li>' +
+          '<li>点击「添加笔记分节」扩展内容；分节标题可直接修改。</li>' +
+          '<li>务必定期点击「导出完整备份」保存 JSON 文件；换设备时用「导入备份」恢复。</li>' +
+        '</ol>' +
+        '<button class="primary" type="button" data-action="close-guide">开始记录' + ic("chevronRight", 16) + '</button>' +
+      '</div>' +
+    '</div>';
+
+  /* ---------------- 渲染：侧栏 ---------------- */
+  function renderSidebar() {
+    var allCount = state.notes.length;
+    var html =
+      '<div class="brand"><div class="brand-icon">' + ic("bookOpen", 23) + '</div>' +
+        '<div><b>阅知<span>READING NOTES</span></b></div></div>' +
+      '<div class="workspace"><span class="avatar">研</span>' +
+        '<div><b>本地研究空间</b><small>' + ic("users", 10) + '仅保存在此浏览器</small></div></div>' +
+      '<div class="nav-label">文献资料库</div>' +
+      '<button type="button" class="nav-item' + (topic === "全部文献" ? " active" : "") + '" data-action="all-notes">' +
+        ic("bookOpen", 17) + '全部文献<span>' + allCount + '</span></button>' +
+      '<div class="nav-label topics-label">研究主题<button type="button" data-action="add-topic" title="添加主题">' + ic("plus", 15) + '</button></div>';
+
+    state.topics.forEach(function (t, idx) {
+      var count = state.notes.filter(function (n) { return n.topic === t; }).length;
+      html +=
+        '<div class="topic-row">' +
+          '<button type="button" class="nav-item' + (topic === t ? " active" : "") + '" data-action="select-topic" data-topic="' + esc(t) + '">' +
+            '<i style="background:' + TOPIC_COLORS[idx % 4] + '"></i>' + esc(t) + '<span>' + count + '</span>' +
+          '</button>' +
+          '<button type="button" class="rename" data-action="rename-topic" data-topic="' + esc(t) + '" title="重命名主题">⋯</button>' +
+        '</div>';
+    });
+
+    html +=
+      '<button type="button" class="add-topic" data-action="add-topic">' + ic("plus", 15) + '添加研究主题</button>' +
+      '<div class="sidebar-bottom">' +
+        '<div class="tip"><span>把灵感留给未来的自己</span><p>一篇文献，一点发现，<br/>慢慢构建自己的知识地图。</p></div>' +
+        '<button type="button" data-action="export">' + ic("download", 16) + '导出完整备份</button>' +
+        '<button type="button" data-action="import">' + ic("upload", 16) + '导入备份</button>' +
+        '<button type="button" data-action="guide">' + ic("help", 16) + '使用指南</button>' +
+      '</div>';
+
+    document.getElementById("sidebar").innerHTML = html;
+    document.getElementById("sidebar").classList.toggle("open", menuOpen);
+  }
+
+  /* ---------------- 渲染：列表 ---------------- */
+  function filteredNotes() {
+    var q = query.trim().toLowerCase();
+    return state.notes.filter(function (n) {
+      var okTopic = topic === "全部文献" || n.topic === topic;
+      if (!okTopic) return false;
+      if (!q) return true;
+      var text = [n.title, n.authors, n.journal, n.sections.map(function (s) {
+        return s.title + " " + s.html.replace(/<[^>]*>/g, " ");
+      }).join(" ")].join(" ").toLowerCase();
+      return text.indexOf(q) !== -1;
+    }).sort(function (a, b) { return b.updated.localeCompare(a.updated); });
+  }
+
+  function renderList() {
+    var list = filteredNotes();
+    document.getElementById("libraryTitle").textContent = topic;
+    document.getElementById("libraryCount").textContent = list.length + " 篇";
+    document.getElementById("crumbTopic").textContent = topic;
+
+    var box = document.getElementById("noteList");
+    if (!list.length) {
+      box.innerHTML =
+        '<div class="empty-list">' + ic("folderOpen", 30) +
+          '<p>' + (query ? "没有找到匹配的文献" : "还没有文献笔记") + '</p>' +
+          '<small>' + (query ? "换一个关键词试试" : "点击上方按钮，开始第一篇阅读记录") + '</small>' +
+        '</div>';
+      return;
+    }
+    box.innerHTML = list.map(function (n) {
+      return '<button type="button" class="note-card' + (n.id === selectedId ? " selected" : "") + '" data-action="select-note" data-id="' + esc(n.id) + '">' +
+        '<div class="card-top"><span class="tag">' + esc(n.topic) + '</span><span class="year">' + (n.year ? esc(n.year) : "年份未填写") + '</span></div>' +
+        '<h3>' + esc(n.title || "未命名文献") + '</h3>' +
+        '<p>' + esc(n.journal || "待填写期刊") + '</p>' +
+        '<div class="card-bottom">' +
+          '<span class="reading' + (n.status === "已读完" ? " done" : "") + '">● ' + esc(n.status) + '</span>' +
+          '<span>' + new Date(n.updated).toLocaleDateString("zh-CN", { month: "short", day: "numeric" }) + '</span>' +
+        '</div>' +
+      '</button>';
+    }).join("");
+  }
+
+  /* ---------------- 渲染：状态 ---------------- */
+  function renderStatus() {
+    var dot = document.getElementById("statusDot");
+    var text = document.getElementById("statusText");
+    if (!dot || !text) return;
+    var map = {
+      saved: ["dot", "已保存到本机"],
+      dirty: ["dot amber", "有修改，待保存…"],
+      error: ["dot red", "保存失败"]
+    };
+    var m = map[saveState] || map.saved;
+    dot.className = m[0];
+    text.textContent = m[1];
+  }
+
+  /* ---------------- 渲染：编辑器 ---------------- */
+  function welcomeHtml() {
+    return '<div class="welcome">' +
+      '<div class="welcome-icon">' + ic("bookOpen", 36) + '</div>' +
+      '<div class="eyebrow">READ · REFLECT · CONNECT</div>' +
+      '<h2>让每一次阅读<br/>都有迹可循。</h2>' +
+      '<p>收集重要的发现，记录自己的思考。<br/>从第一篇文献开始，构建专属的研究笔记。</p>' +
+      '<button class="primary" type="button" data-action="new-note">' + ic("plus", 17) + '创建第一篇文献笔记</button>' +
+      '<div class="welcome-features">' +
+        '<span>' + ic("fileText", 15) + '自由分节</span>' +
+        '<span>' + ic("imagePlus", 15) + '图文记录</span>' +
+        '<span>' + ic("check", 15) + '本机保存</span>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function sectionHtml(note, s, i) {
+    var total = note.sections.length;
+    return '<section class="note-section" data-section-id="' + esc(s.id) + '">' +
+      '<div class="section-heading">' +
+        '<span class="section-number">' + String(i + 1).padStart(2, "0") + '</span>' +
+        '<input aria-label="分节标题" value="' + esc(s.title) + '" data-section-title="' + esc(s.id) + '" />' +
+        '<div class="section-actions">' +
+          '<button type="button" data-action="move-section" data-id="' + esc(s.id) + '" data-dir="-1" title="上移分节"' + (i === 0 ? " disabled" : "") + '>' + ic("arrowUp", 14) + '</button>' +
+          '<button type="button" data-action="move-section" data-id="' + esc(s.id) + '" data-dir="1" title="下移分节"' + (i === total - 1 ? " disabled" : "") + '>' + ic("arrowDown", 14) + '</button>' +
+          '<button type="button" data-action="remove-section" data-id="' + esc(s.id) + '" title="删除分节">' + ic("trash", 14) + '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="editable" contenteditable="true" data-editable="' + esc(s.id) + '" data-placeholder="在这里记录阅读发现，也可以直接粘贴图片……">' + clean(s.html) + '</div>' +
+    '</section>';
+  }
+
+  function renderEditor() {
+    var pane = document.getElementById("editorPane");
+    var note = findNote(selectedId);
+    activeEl = null; activeSectionId = ""; savedRange = null;
+
+    if (!note) { pane.innerHTML = welcomeHtml(); return; }
+
+    var metaFields = [
+      ["authors", "作者", "例如：Sun Y, et al."],
+      ["journal", "期刊", "期刊名称"],
+      ["year", "年份", "2026"],
+      ["doi", "DOI / 链接", "10.xxxx/…"]
+    ];
+
+    var metaHtml = metaFields.map(function (f) {
+      return '<label><span>' + f[1] + '</span><input data-field="' + f[0] + '" value="' + esc(note[f[0]] || "") + '" placeholder="' + f[2] + '" /></label>';
+    }).join("");
+
+    metaHtml += '<label><span>研究主题</span><select data-field="topic">' +
+      state.topics.map(function (t) {
+        return '<option' + (t === note.topic ? " selected" : "") + '>' + esc(t) + '</option>';
+      }).join("") + '</select></label>';
+
+    pane.innerHTML =
+      '<div class="document-top">' +
+        '<span class="tag">' + esc(note.topic) + '</span>' +
+        '<div>' +
+          '<select aria-label="阅读状态" data-field="status">' +
+            ["待读", "阅读中", "已读完"].map(function (s) {
+              return '<option' + (s === note.status ? " selected" : "") + '>' + s + '</option>';
+            }).join("") +
+          '</select>' +
+          '<button type="button" data-action="delete-note" title="删除文献">' + ic("trash", 16) + '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="document">' +
+        '<textarea class="doc-title" aria-label="文献标题" placeholder="输入文献题目" rows="2" data-field="title">' + esc(note.title) + '</textarea>' +
+        '<div class="metadata">' + metaHtml + '</div>' +
+      '</div>' +
+      '<div class="toolbar">' +
+        '<button type="button" data-cmd="bold" title="加粗">' + ic("bold", 16) + '</button>' +
+        '<button type="button" data-cmd="italic" title="斜体">' + ic("italic", 16) + '</button>' +
+        '<span class="divider"></span>' +
+        '<select aria-label="字号" data-cmd="size">' +
+          [12, 14, 16, 18, 20, 24, 28, 32].map(function (s) {
+            return '<option value="' + s + '"' + (s === 16 ? " selected" : "") + '>' + s + ' px</option>';
+          }).join("") +
+        '</select>' +
+        '<label class="color" title="文字颜色">A<input type="color" data-cmd="color" value="#263b35" aria-label="文字颜色" /></label>' +
+        '<button type="button" data-cmd="insertUnorderedList" title="项目列表">' + ic("list", 17) + '</button>' +
+        '<span class="divider"></span>' +
+        '<button type="button" class="image-button" data-action="pick-image">' + ic("imagePlus", 16) + '插入图片</button>' +
+        '<input type="file" id="imageFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden />' +
+        '<span class="toolbar-tip">支持直接粘贴图片</span>' +
+      '</div>' +
+      '<div class="document sections" id="sections">' +
+        note.sections.map(function (s, i) { return sectionHtml(note, s, i); }).join("") +
+        '<button type="button" class="add-section" data-action="add-section">' + ic("plus", 17) + '添加笔记分节</button>' +
+        '<p class="document-footer">每一条思考，都是下一次发现的起点。</p>' +
+      '</div>';
+  }
+
+  function renderAll() {
+    renderSidebar();
+    renderList();
+    renderEditor();
+    renderStatus();
+  }
+
+  /* ---------------- 数据操作 ---------------- */
+  function touch(note) { note.updated = nowISO(); }
+
+  function patchNote(values) {
+    var note = findNote(selectedId);
+    if (!note) return;
+    Object.keys(values).forEach(function (k) { note[k] = values[k]; });
+    touch(note);
+    scheduleSave();
+    renderList();
+    var tag = document.querySelector("#editorPane .document-top .tag");
+    if (tag && values.topic) tag.textContent = note.topic;
+  }
+
+  function changeSectionHtml(sectionId, html) {
+    var note = findNote(selectedId);
+    if (!note) return;
+    for (var i = 0; i < note.sections.length; i++) {
+      if (note.sections[i].id === sectionId) {
+        note.sections[i].html = html;
+        touch(note);
+        scheduleSave();
+        return;
+      }
+    }
+  }
+
+  function newNote() {
+    var t = topic === "全部文献" ? (state.topics[0] || "未分类") : topic;
+    if (!state.topics.length) state.topics.push("未分类");
+    var note = {
+      id: uid(), topic: t, title: "未命名文献", authors: "", journal: "", year: "", doi: "",
+      status: "阅读中", updated: nowISO(),
+      sections: DEFAULT_SECTIONS.map(function (title) { return { id: uid(), title: title, html: "" }; })
+    };
+    state.notes.unshift(note);
+    selectedId = note.id;
+    query = "";
+    document.getElementById("searchInput").value = "";
+    menuOpen = false;
+    scheduleSave();
+    renderAll();
+  }
+
+  function addTopic() {
+    var name = prompt("输入研究主题名称");
+    if (!name) return;
+    name = name.trim();
+    if (!name || state.topics.indexOf(name) !== -1) return;
+    state.topics.push(name);
+    topic = name;
+    scheduleSave();
+    renderAll();
+  }
+
+  function renameTopic(oldName) {
+    var name = prompt("重命名主题", oldName);
+    if (!name) return;
+    name = name.trim();
+    if (!name || name === oldName || state.topics.indexOf(name) !== -1) return;
+    state.topics = state.topics.map(function (t) { return t === oldName ? name : t; });
+    state.notes.forEach(function (n) { if (n.topic === oldName) { n.topic = name; touch(n); } });
+    if (topic === oldName) topic = name;
+    scheduleSave();
+    renderAll();
+  }
+
+  /* ---------------- 富文本命令 ---------------- */
+  function execCmd(name, value) {
+    if (!activeEl) { showError("请先点击一个分节的正文，再选择格式。"); return; }
+    activeEl.focus();
+    if (savedRange && activeEl.contains(savedRange.commonAncestorContainer)) {
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(savedRange);
+    }
+    document.execCommand(name, false, value);
+    changeSectionHtml(activeSectionId, activeEl.innerHTML);
+    var s = window.getSelection();
+    if (s && s.rangeCount) savedRange = s.getRangeAt(0).cloneRange();
+  }
+
+  function setFontSize(px) {
+    if (!activeEl) { showError("请先点击一个分节的正文，再选择字号。"); return; }
+    activeEl.focus();
+    if (savedRange && activeEl.contains(savedRange.commonAncestorContainer)) {
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(savedRange);
+    }
+    document.execCommand("fontSize", false, "7");
+    activeEl.querySelectorAll('font[size="7"]').forEach(function (f) {
+      var span = document.createElement("span");
+      span.style.fontSize = px + "px";
+      while (f.firstChild) span.appendChild(f.firstChild);
+      f.parentNode.replaceChild(span, f);
+    });
+    changeSectionHtml(activeSectionId, activeEl.innerHTML);
+  }
+
+  /* ---------------- 图片 ---------------- */
+  function insertImage(el, range, src, alt) {
+    var img = document.createElement("img");
+    img.src = src;
+    img.alt = alt || "文献图片";
+    img.style.maxWidth = "100%";
+    img.style.height = "auto";
+    var br = document.createElement("br");
+    if (range && el.contains(range.commonAncestorContainer)) {
+      range.deleteContents();
+      range.insertNode(img);
+      range.setStartAfter(img);
+      range.collapse(true);
+      range.insertNode(br);
+      range.setStartAfter(br);
+      range.collapse(true);
+    } else {
+      el.appendChild(img);
+      el.appendChild(br);
+    }
+    el.focus();
+    var sel = window.getSelection();
+    if (sel && range) { sel.removeAllRanges(); sel.addRange(range); }
+  }
+
+  function saveRange(el) {
+    var sel = window.getSelection();
+    if (sel && sel.rangeCount && el.contains(sel.anchorNode)) return sel.getRangeAt(0).cloneRange();
+    return null;
+  }
+
+  async function handleFiles(files, el, sectionId) {
+    var range = saveRange(el);
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (!/^image\/(png|jpe?g|webp|gif)$/.test(f.type)) continue;
+      if (f.size > MAX_IMAGE_BYTES) { showError('图片「' + (f.name || "未命名") + "」超过 1.5MB，请压缩后再插入。"); continue; }
+      var dataUrl = await readAsDataURL(f);
+      if (!el.isConnected) return; // 期间切换了文献
+      insertImage(el, range, dataUrl, f.name);
+    }
+    changeSectionHtml(sectionId, el.innerHTML);
+  }
+
+  /* ---------------- 事件委托 ---------------- */
+  var app = document.getElementById("app");
+
+  app.addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    var action = btn.getAttribute("data-action");
+
+    if (action === "toggle-menu") { menuOpen = !menuOpen; document.getElementById("sidebar").classList.toggle("open", menuOpen); return; }
+    if (action === "dismiss-error") { hideError(); return; }
+    if (action === "flush-save") { flushSave(); return; }
+
+    if (action === "all-notes") { topic = "全部文献"; menuOpen = false; renderSidebar(); renderList(); return; }
+    if (action === "select-topic") { topic = btn.getAttribute("data-topic"); menuOpen = false; renderSidebar(); renderList(); return; }
+    if (action === "add-topic") { addTopic(); return; }
+    if (action === "rename-topic") { renameTopic(btn.getAttribute("data-topic")); return; }
+    if (action === "export") { exportData(); return; }
+    if (action === "import") { document.getElementById("importFile").click(); return; }
+    if (action === "guide") { document.getElementById("guideModal").hidden = false; return; }
+    if (action === "close-guide") { document.getElementById("guideModal").hidden = true; return; }
+
+    if (action === "new-note") { newNote(); return; }
+    if (action === "select-note") {
+      flushSave();
+      selectedId = btn.getAttribute("data-id");
+      renderList();
+      renderEditor();
+      return;
+    }
+    if (action === "delete-note") {
+      var note = findNote(selectedId);
+      if (!note) return;
+      if (!confirm("确定删除这篇文献及其全部笔记吗？")) return;
+      state.notes = state.notes.filter(function (n) { return n.id !== note.id; });
+      selectedId = state.notes[0] ? state.notes[0].id : "";
+      scheduleSave();
+      renderAll();
+      return;
+    }
+    if (action === "add-section") {
+      var n = findNote(selectedId);
+      if (!n) return;
+      n.sections.push({ id: uid(), title: "新分节", html: "" });
+      touch(n);
+      scheduleSave();
+      renderEditor();
+      renderList();
+      return;
+    }
+    if (action === "remove-section") {
+      var id = btn.getAttribute("data-id");
+      var nn = findNote(selectedId);
+      if (!nn || !confirm("删除这个分节及其内容？")) return;
+      nn.sections = nn.sections.filter(function (s) { return s.id !== id; });
+      touch(nn);
+      scheduleSave();
+      renderEditor();
+      return;
+    }
+    if (action === "move-section") {
+      var mid = btn.getAttribute("data-id");
+      var dir = Number(btn.getAttribute("data-dir"));
+      var mn = findNote(selectedId);
+      if (!mn) return;
+      var idx = mn.sections.findIndex(function (s) { return s.id === mid; });
+      var j = idx + dir;
+      if (idx < 0 || j < 0 || j >= mn.sections.length) return;
+      var tmp = mn.sections[idx];
+      mn.sections[idx] = mn.sections[j];
+      mn.sections[j] = tmp;
+      touch(mn);
+      scheduleSave();
+      renderEditor();
+      return;
+    }
+    if (action === "pick-image") {
+      if (!activeEl) { showError("请先点击需要插入图片的分节正文。"); return; }
+      document.getElementById("imageFile").click();
+      return;
+    }
+  });
+
+  app.addEventListener("input", function (e) {
+    var t = e.target;
+
+    if (t.id === "searchInput") { query = t.value; renderList(); return; }
+
+    var field = t.getAttribute && t.getAttribute("data-field");
+    if (field) { patchNote({ [field]: t.value }); return; }
+
+    var sid = t.getAttribute && t.getAttribute("data-section-title");
+    if (sid) {
+      var note = findNote(selectedId);
+      if (!note) return;
+      for (var i = 0; i < note.sections.length; i++) {
+        if (note.sections[i].id === sid) {
+          note.sections[i].title = t.value;
+          touch(note);
+          scheduleSave();
+          return;
+        }
+      }
+      return;
+    }
+
+    var eid = t.getAttribute && t.getAttribute("data-editable");
+    if (eid) { changeSectionHtml(eid, t.innerHTML); return; }
+  });
+
+  app.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.id === "imageFile") {
+      if (t.files && t.files.length && activeEl) {
+        handleFiles(Array.prototype.slice.call(t.files), activeEl, activeSectionId);
+      }
+      t.value = "";
+      return;
+    }
+    var field = t.getAttribute && t.getAttribute("data-field");
+    if (field) { patchNote({ [field]: t.value }); return; }
+    if (t.getAttribute && t.getAttribute("data-cmd") === "color") { execCmd("foreColor", t.value); return; }
+  });
+
+  /* 记录当前聚焦的分节，并在工具栏 mousedown 前保存选区 */
+  app.addEventListener("focusin", function (e) {
+    var ed = e.target.closest && e.target.closest("[data-editable]");
+    if (ed) { activeEl = ed; activeSectionId = ed.getAttribute("data-editable"); }
+  });
+
+  app.addEventListener("mousedown", function (e) {
+    var toolbar = e.target.closest(".toolbar");
+    if (toolbar && activeEl) {
+      var sel = window.getSelection();
+      if (sel && sel.rangeCount && activeEl.contains(sel.anchorNode)) {
+        savedRange = sel.getRangeAt(0).cloneRange();
+      }
+    }
+    var cmdBtn = e.target.closest("[data-cmd]");
+    if (cmdBtn) e.preventDefault(); // 防止失焦
+  });
+
+  app.addEventListener("click", function (e) {
+    var cmdBtn = e.target.closest("[data-cmd]");
+    if (!cmdBtn) return;
+    var cmd = cmdBtn.getAttribute("data-cmd");
+    if (cmd === "size") { setFontSize(cmdBtn.value); return; }
+    if (cmd === "color") return; // 由 change 处理
+    execCmd(cmd);
+  });
+
+  /* 粘贴：图片或纯文本 */
+  app.addEventListener("paste", function (e) {
+    var ed = e.target.closest && e.target.closest("[data-editable]");
+    if (!ed) return;
+    var items = Array.prototype.slice.call(e.clipboardData.items || []);
+    var files = items.filter(function (it) { return it.kind === "file" && it.type.indexOf("image/") === 0; })
+                     .map(function (it) { return it.getAsFile(); })
+                     .filter(Boolean);
+    e.preventDefault();
+    if (files.length) {
+      handleFiles(files, ed, ed.getAttribute("data-editable"));
+      return;
+    }
+    var text = e.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+    changeSectionHtml(ed.getAttribute("data-editable"), ed.innerHTML);
+  });
+
+  /* 阻止拖拽图片，引导使用工具栏 */
+  app.addEventListener("dragover", function (e) {
+    if (e.target.closest && e.target.closest("[data-editable]")) e.preventDefault();
+  });
+  app.addEventListener("drop", function (e) {
+    if (e.target.closest && e.target.closest("[data-editable]")) {
+      e.preventDefault();
+      showError("请使用工具栏的「插入图片」上传图片。");
+    }
+  });
+
+  /* 点击遮罩关闭指南 */
+  document.getElementById("guideModal").addEventListener("click", function (e) {
+    if (e.target === this) this.hidden = true;
+  });
+
+  /* ---------------- 导出 / 导入 ---------------- */
+  function exportData() {
+    flushSave();
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "阅知文献备份-" + new Date().toISOString().slice(0, 10) + ".json";
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
+  }
+
+  function validData(d) {
+    if (!d || !Array.isArray(d.topics) || !Array.isArray(d.notes)) return false;
+    if (!d.topics.every(function (t) { return typeof t === "string"; })) return false;
+    return d.notes.every(function (n) {
+      return n && typeof n.id === "string" && typeof n.title === "string" &&
+        typeof n.topic === "string" && typeof n.status === "string" &&
+        typeof n.updated === "string" && Array.isArray(n.sections) &&
+        n.sections.every(function (s) {
+          return s && typeof s.id === "string" && typeof s.title === "string" && typeof s.html === "string";
+        });
+    });
+  }
+
+  document.getElementById("importFile").addEventListener("change", function (e) {
+    var f = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var d = JSON.parse(reader.result);
+        if (!validData(d)) { showError("备份文件格式不正确。"); return; }
+        if (!confirm("导入会覆盖当前浏览器中的全部笔记，确定继续？建议先导出当前数据备份。")) return;
+        d.notes.forEach(function (n) {
+          n.authors = n.authors || ""; n.journal = n.journal || "";
+          n.year = n.year || ""; n.doi = n.doi || "";
+          n.sections.forEach(function (s) { s.html = clean(s.html); });
+        });
+        state = d;
+        selectedId = state.notes[0] ? state.notes[0].id : "";
+        topic = "全部文献";
+        query = "";
+        document.getElementById("searchInput").value = "";
+        flushSave();
+        renderAll();
+      } catch (err) { showError("无法解析备份文件。"); }
+    };
+    reader.readAsText(f);
+  });
+
+  /* ---------------- 离开提醒 ---------------- */
+  window.addEventListener("beforeunload", function (e) {
+    if (saveTimer) flushSave();
+  });
+
+  /* ---------------- 启动 ---------------- */
+  renderAll();
+})();
+</script>
+</body>
+</html>
